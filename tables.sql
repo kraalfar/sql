@@ -9,7 +9,7 @@ CREATE TABLE Medicine (
     dosageForm         TEXT,       --лекарственная форма
     manufacturer       TEXT,       --производитель
     activeSubstance    INTEGER,    --id вещества
-    certificate        INTEGER     --id сертификата
+    certificate        TEXT        --id сертификата
 );
 
 
@@ -44,7 +44,7 @@ CREATE TABLE Laboratory (
 CREATE TABLE Distributor (
     id                  INTEGER,    --id
     address             TEXT,       --адресс дистриббютера
-    accountNumber       INTEGER,    --номер банковского счета
+    accountNumber       TEXT,       --номер банковского счета
     name                TEXT,       --имя контакного лица
     surname             TEXT,       --фамилия контакного лица
     phone               TEXT        --телефон контакного лица
@@ -77,6 +77,7 @@ CREATE TABLE DeliveryContent (
 
 --РОЗНИЧНАЯ ПРОДАЖА
 
+--Аптеки
 CREATE TABLE Pharmacy (
     id          INTEGER,    --id
     number      INTEGER,    --номер
@@ -96,7 +97,7 @@ CREATE TABLE MedsInPharmas (
 --Автомобили
 CREATE TABLE Car (
     id          INTEGER,    --id
-    number      INTEGER,    --регистрационный номер
+    number      TEXT,       --регистрационный номер
     tDate       DATE        --дата последнего техобслуживания
 );
 
