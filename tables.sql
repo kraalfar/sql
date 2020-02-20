@@ -3,37 +3,37 @@
 
 --Лекарства
 CREATE TABLE Medicine (
-    id                 INTEGER,    --id
-    tradeName          TEXT,       --торговое название
-    genericName        TEXT,       --еждународное непатен- тованное название
-    dosageForm         TEXT,       --лекарственная форма
-    manufacturer       TEXT,       --производитель
-    activeSubstance    INTEGER,    --id вещества
-    certificate        TEXT        --id сертификата
+    id                 SERIAL PRIMARY KEY,    --id
+    tradeName          TEXT UNIQUE NOT NULL,       --торговое название
+    genericName        TEXT UNIQUE NOT NULL,       --международное непатентованное название
+    dosageForm         TEXT NOT NULL,       --лекарственная форма
+    manufacturer       TEXT NOT NULL,       --производитель
+    activeSubstance    INTEGER REFERENCES ChemicalCompound,    --id вещества
+    certificate        INT REFERENCES Certificate --id сертификата
 );
 
 
 --Действущее вещества ака химическое соединение
 CREATE TABLE ChemicalCompound (
-    id                  INTEGER,    --id
-    name                TEXT,       --название
-    chemical_formula    TEXT        --химическая формула
+    id                  SERIAL PRIMARY KEY,    --id
+    name                TEXT UNIQUE NOT NULL,       --название
+    chemical_formula    TEXT UNIQUE NOT NULL       --химическая формула
 );
 
 
 --Сертификат
 CREATE TABLE Certificate (
-    id          INTEGER,    --id
-    number      INTEGER,    --номер сертификата
-    validity    DATE,       --срок действия
-    laboratory  INTEGER     --id лаборатории
+    id          SERIAL PRIMARY KEY,    --id
+    number      INTEGER UNIQUE NOT NULL,    --номер сертификата
+    validity    DATE NOT NULL,       --срок действия
+    laboratory  INTEGER REFERENCES Laboratory  --id лаборатории
 );
 
 --Лаборатория
 CREATE TABLE Laboratory (
-    id              INTEGER,    --id
-    name            TEXT,       --название лаборатории
-    headSurname     TEXT        --фамилия руководителя
+    id              SERIAL PRIMARY KEY,    --id
+    name            TEXT UNIQUE NOT NULL,       --название лаборатории
+    headSurname     TEXT NOT NULL        --фамилия руководителя
 );
 
 
@@ -42,35 +42,35 @@ CREATE TABLE Laboratory (
 
 --Дистрибьюторы
 CREATE TABLE Distributor (
-    id                  INTEGER,    --id
-    address             TEXT,       --адресс дистриббютера
-    accountNumber       TEXT,       --номер банковского счета
-    name                TEXT,       --имя контакного лица
-    surname             TEXT,       --фамилия контакного лица
-    phone               TEXT        --телефон контакного лица
+    id                  SERIAL PRIMARY KEY,    --id
+    address             TEXT NOT NULL,       --адресс дистриббютера
+    accountNumber       TEXT UNIQUE NOT NULL,       --номер банковского счета
+    name                TEXT NOT NULL,       --имя контакного лица
+    surname             TEXT NOT NULL,       --фамилия контакного лица
+    phone               TEXT UNIQUE NOT NULL      --телефон контакного лица
 );
 
 
 --Поставка
 CREATE TABLE Delivery (
-    id                  INTEGER,        --id
-    distributor         INTEGER,        --id дистрибьютера
-    storageNumber       INTEGER,        --номер склада
-    storageAddress      TEXT,           --адрес склада
-    arrivalTime         TIMESTAMP,      --время прибытия
-    manName             TEXT            --фамилия кладовщика
+    id                  SERIAL PRIMARY KEY,        --id
+    distributor         INTEGER REFERENCES Distributor,        --id дистрибьютера
+    storageNumber       INTEGER UNIQUE NOT NULL,        --номер склада
+    storageAddress      TEXT NOT NULL,           --адрес склада
+    arrivalTime         TIMESTAMP NOT NULL,      --время прибытия
+    manName             TEXT UNIQUE NOT NULL         --фамилия кладовщика
 
 );
 
 
 --Таблица лекарств в поставке
 CREATE TABLE DeliveryContent (
-    deliveryId          INTEGER,    --id поставки
-    medicineId          INTEGER,    --id лекарства
-    bigNumber           INTEGER,    --количество перевозочных упаковок
-    weight              INTEGER,    --вес одной перевозочной упаковки
-    smallInBigNumber    INTEGER,    --количество отпукных упа- ковок в одной перевозочной
-    cost                INTEGER     --закупочная стоимость одной отпускной упаковки
+    deliveryId          INTEGER REFERENCES Delivery,    --id поставки
+    medicineId          INTEGER REFERENCES Medicine,    --id лекарства
+    bigNumber           INTEGER NOT NULL,    --количество перевозочных упаковок
+    weight              INTEGER NOT NULL,    --вес одной перевозочной упаковки
+    smallInBigNumber    INTEGER NOT NULL,    --количество отпукных упа- ковок в одной перевозочной
+    cost                INTEGER NOT NULL  --закупочная стоимость одной отпускной упаковки
 );
 
 
@@ -79,36 +79,41 @@ CREATE TABLE DeliveryContent (
 
 --Аптеки
 CREATE TABLE Pharmacy (
-    id          INTEGER,    --id
-    number      INTEGER,    --номер
-    name        TEXT,       --название
-    address     TEXT        --адресс
+    id          SERIAL PRIMARY KEY,    --id
+    number      INTEGER UNIQUE NOT NULL,    --номер
+    name        TEXT UNIQUE NOT NULL,       --название
+    address     TEXT NOT NULL        --адресс
 );
 
 
 --Цены на лекарства в атеках
 CREATE TABLE MedsInPharmas (
-    pharmacyId      INTEGER,    --id аптеки
-    medicineId      INTEGER,    --id лекарства
-    cost            INTEGER,    --цена лекарства в аптеке
-    amount          INTEGER,    --количество лекарства в аптеке
+    pharmacyId      INTEGER REFERENCES Pharmacy,    --id аптеки
+    medicineId      INTEGER REFERENCES Medicine``,    --id лекарства
+    cost            INTEGER UNIQUE NOT NULL,    --цена лекарства в аптеке
+    amount          INTEGER UNIQUE NOT NULL,    --количество лекарства в аптеке
 );
 
 --Автомобили
 CREATE TABLE Car (
-    id          INTEGER,    --id
-    number      TEXT,       --регистрационный номер
-    tDate       DATE        --дата последнего техобслуживания
+    id          SERIAL PRIMARY KEY,    --id
+    number      TEXT UNIQUE NOT NULL,       --регистрационный номер
+    tDate       DATE NOT NULL       --дата последнего техобслуживания
 );
 
 
 -- Задания автомобилей
 CREATE TABLE Task (
-    carId               INTEGER,    --id машины
-    date                DATE,       --дата поездки
-    storageAddress      TEXT,       --адрес склада
-    number              INTEGER,    --количества лекарства в поставке
-    medicineId          INTEGER,    --id лекарства
-    pharmacyId          INTEGER     --id аптеки
+    carId               INTEGER REFERENCES Car,    --id машины
+    date                DATE UNIQUE NOT NULL,       --дата поездки
+    storageAddress      TEXT UNIQUE NOT NULL,       --адрес склада
+    number              INTEGER UNIQUE NOT NULL,    --количества лекарства в поставке
+    medicineId          INTEGER REFERENCES Medicine,    --id лекарства
+    pharmacyId          INTEGER REFERENCES Pharmacy     --id аптеки
 );
 
+
+
+-- Справочник. Если есть конечное множество значений.
+-- Create Enum - просто перечсиление всех возможных значений
+-- Create Table  с атрибутами id и value
