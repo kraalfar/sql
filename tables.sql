@@ -1,5 +1,27 @@
+--Действущее вещества ака химическое соединение
+CREATE TABLE ChemicalCompound (
+    id                  SERIAL PRIMARY KEY,        --id
+    name                TEXT UNIQUE NOT NULL,      --название
+    chemical_formula    TEXT UNIQUE NOT NULL       --химическая формула
+);
 
---ЛЕКАРСТВА
+
+--Лаборатория
+CREATE TABLE Laboratory (
+    id              SERIAL PRIMARY KEY,         --id
+    name            TEXT UNIQUE NOT NULL,       --название лаборатории
+    headSurname     TEXT NOT NULL               --фамилия руководителя
+);
+
+
+--Сертификат
+CREATE TABLE Certificate (
+    id          SERIAL PRIMARY KEY,            --id
+    number      INTEGER UNIQUE NOT NULL,       --номер сертификата
+    validity    DATE NOT NULL,                 --срок действия
+    laboratory  INTEGER REFERENCES Laboratory  --id лаборатории
+);
+
 
 --Лекарства
 CREATE TABLE Medicine (
@@ -13,41 +35,18 @@ CREATE TABLE Medicine (
 );
 
 
---Действущее вещества ака химическое соединение
-CREATE TABLE ChemicalCompound (
-    id                  SERIAL PRIMARY KEY,        --id
-    name                TEXT UNIQUE NOT NULL,      --название
-    chemical_formula    TEXT UNIQUE NOT NULL       --химическая формула
-);
 
 
---Сертификат
-CREATE TABLE Certificate (
-    id          SERIAL PRIMARY KEY,            --id
-    number      INTEGER UNIQUE NOT NULL,       --номер сертификата
-    validity    DATE NOT NULL,                 --срок действия
-    laboratory  INTEGER REFERENCES Laboratory  --id лаборатории
-);
-
---Лаборатория
-CREATE TABLE Laboratory (
-    id              SERIAL PRIMARY KEY,         --id
-    name            TEXT UNIQUE NOT NULL,       --название лаборатории
-    headSurname     TEXT NOT NULL               --фамилия руководителя
-);
-
-
---ОПТОВОЕ ХРАНЕНИЕ
 
 
 --Дистрибьюторы
 CREATE TABLE Distributor (
-    id                  SERIAL PRIMARY KEY,         --id
-    address             TEXT NOT NULL,              --адресс дистриббютера
-    accountNumber       TEXT UNIQUE NOT NULL,       --номер банковского счета
-    name                TEXT NOT NULL,              --имя контакного лица
-    surname             TEXT NOT NULL,              --фамилия контакного лица
-    phone               TEXT UNIQUE NOT NULL        --телефон контакного лица
+    id                  SERIAL PRIMARY KEY,                --id
+    address             TEXT NOT NULL,                     --адресс дистриббютера
+    accountNumber       VARCHAR(16) UNIQUE NOT NULL,       --номер банковского счета
+    name                TEXT NOT NULL,                     --имя контакного лица
+    surname             TEXT NOT NULL,                     --фамилия контакного лица
+    phone               TEXT UNIQUE NOT NULL               --телефон контакного лица
 );
 
 
@@ -57,25 +56,24 @@ CREATE TABLE Delivery (
     distributor         INTEGER REFERENCES Distributor,        --id дистрибьютера
     storageNumber       INTEGER UNIQUE NOT NULL,               --номер склада
     storageAddress      TEXT NOT NULL,                         --адрес склада
-    arrivalTime         TIMESTAMP NOT NULL,                    --время прибытия
-    manName             TEXT UNIQUE NOT NULL                   --фамилия кладовщика
+    arrivalTime         TIMESTAMP,                             --время прибытия
+    manName             TEXT                                   --фамилия кладовщика
 
 );
 
 
 --Таблица лекарств в поставке
 CREATE TABLE DeliveryContent (
-    deliveryId          INTEGER REFERENCES Delivery,    --id поставки
-    medicineId          INTEGER REFERENCES Medicine,    --id лекарства
-    bigNumber           INTEGER NOT NULL,               --количество перевозочных упаковок
-    weight              INTEGER NOT NULL,               --вес одной перевозочной упаковки
-    smallInBigNumber    INTEGER NOT NULL,               --количество отпукных упа- ковок в одной перевозочной
-    cost                INTEGER NOT NULL                --закупочная стоимость одной отпускной упаковки
+    deliveryId          INTEGER REFERENCES Delivery,                    --id поставки
+    medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
+    bigNumber           INTEGER NOT NULL (CHECK bigNumber>0),           --количество перевозочных упаковок
+    weight              INTEGER NOT NULL (CHECK weight>0),              --вес одной перевозочной упаковки
+    smallInBigNumber    INTEGER NOT NULL (CHECK smallInBigNumber>0),    --количество отпукных упаковок в одной перевозочной
+    cost                INTEGER NOT NULL (CHECK cost>0)                 --закупочная стоимость одной отпускной упаковки
 );
 
 
 
---РОЗНИЧНАЯ ПРОДАЖА
 
 --Аптеки
 CREATE TABLE Pharmacy (
@@ -88,29 +86,34 @@ CREATE TABLE Pharmacy (
 
 --Цены на лекарства в атеках
 CREATE TABLE MedsInPharmas (
-    pharmacyId      INTEGER REFERENCES Pharmacy,    --id аптеки
-    medicineId      INTEGER REFERENCES Medicine,    --id лекарства
-    cost            INTEGER UNIQUE NOT NULL,        --цена лекарства в аптеке
-    amount          INTEGER UNIQUE NOT NULL,        --количество лекарства в аптеке
+    pharmacyId      INTEGER REFERENCES Pharmacy,                     --id аптеки
+    medicineId      INTEGER REFERENCES Medicine,                     --id лекарства
+    cost            INTEGER UNIQUE NOT NULL (CHECK cost > -1),       --цена лекарства в аптеке
+    amount          INTEGER UNIQUE NOT NULL (CHECK amount > -1)      --количество лекарства в аптеке
 );
 
 --Автомобили
 CREATE TABLE Car (
-    id          SERIAL PRIMARY KEY,         --id
-    number      TEXT UNIQUE NOT NULL,       --регистрационный номер
-    tDate       DATE NOT NULL               --дата последнего техобслуживания
+    id          SERIAL PRIMARY KEY,             --id
+    number      VARCHAR(10) UNIQUE NOT NULL,    --регистрационный номер
+    tDate       DATE NOT NULL                   --дата последнего техобслуживания
 );
 
 
 -- Задания автомобилей
 CREATE TABLE Task (
-    carId               INTEGER REFERENCES Car,         --id машины
-    date                DATE UNIQUE NOT NULL,           --дата поездки
-    storageAddress      TEXT UNIQUE NOT NULL,           --адрес склада
-    number              INTEGER UNIQUE NOT NULL,        --количества лекарства в поставке
-    medicineId          INTEGER REFERENCES Medicine,    --id лекарства
-    pharmacyId          INTEGER REFERENCES Pharmacy     --id аптеки
+    carId               INTEGER REFERENCES Car,                         --id машины
+    date                DATE UNIQUE NOT NULL,                           --дата поездки
+    storageAddress      TEXT UNIQUE NOT NULL,                           --адрес склада
+    number              INTEGER UNIQUE NOT NULL (CHECK number > 0),     --количества лекарства в поставке
+    medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
+    pharmacyId          INTEGER REFERENCES Pharmacy                     --id аптеки
 );
+
+
+
+
+
 
 
 
