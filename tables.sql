@@ -1,4 +1,4 @@
---Действущее вещества ака химическое соединение
+--Действущие вещества ака химическое соединение
 DROP TABLE IF EXISTS ChemicalCompound CASCADE;
 CREATE TABLE ChemicalCompound (
     id                  SERIAL PRIMARY KEY,        --id
@@ -95,8 +95,8 @@ CREATE TABLE Pharmacy (
 --Цены на лекарства в атеках
 DROP TABLE IF EXISTS MedsInPharmas CASCADE;
 CREATE TABLE MedsInPharmas (
-    pharmacyId      INTEGER REFERENCES Pharmacy,                     --id аптеки
-    medicineId      INTEGER REFERENCES Medicine,                     --id лекарства
+    pharmacyId      INTEGER REFERENCES Pharmacy,              --id аптеки
+    medicineId      INTEGER REFERENCES Medicine,              --id лекарства
     cost            INTEGER NOT NULL CHECK (cost > -1),       --цена лекарства в аптеке
     amount          INTEGER NOT NULL CHECK (amount > -1)      --количество лекарства в аптеке
 );
