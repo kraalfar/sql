@@ -1,4 +1,5 @@
 --Действущее вещества ака химическое соединение
+DROP TABLE IF EXISTS ChemicalCompound CASCADE;
 CREATE TABLE ChemicalCompound (
     id                  SERIAL PRIMARY KEY,        --id
     name                TEXT UNIQUE NOT NULL,      --название
@@ -7,6 +8,7 @@ CREATE TABLE ChemicalCompound (
 
 
 --Лаборатория
+DROP TABLE IF EXISTS Laboratory CASCADE;
 CREATE TABLE Laboratory (
     id              SERIAL PRIMARY KEY,         --id
     name            TEXT UNIQUE NOT NULL,       --название лаборатории
@@ -15,7 +17,8 @@ CREATE TABLE Laboratory (
 
 
 --Сертификат
-CREATE TABLE Certificate (
+DROP TABLE IF EXISTS Laboratory CASCADE;
+CREATE TABLE Laboratory (
     id          SERIAL PRIMARY KEY,            --id
     number      INTEGER UNIQUE NOT NULL,       --номер сертификата
     validity    DATE NOT NULL,                 --срок действия
@@ -24,6 +27,7 @@ CREATE TABLE Certificate (
 
 
 --Лекарства
+DROP TABLE IF EXISTS Medicine CASCADE;
 CREATE TABLE Medicine (
     id                 SERIAL PRIMARY KEY,                     --id
     tradeName          TEXT UNIQUE NOT NULL,                   --торговое название
@@ -40,6 +44,7 @@ CREATE TABLE Medicine (
 
 
 --Дистрибьюторы
+DROP TABLE IF EXISTS Distributor CASCADE;
 CREATE TABLE Distributor (
     id                  SERIAL PRIMARY KEY,                --id
     address             TEXT NOT NULL,                     --адресс дистриббютера
@@ -51,6 +56,7 @@ CREATE TABLE Distributor (
 
 
 --Поставка
+DROP TABLE IF EXISTS Delivery CASCADE;
 CREATE TABLE Delivery (
     id                  SERIAL PRIMARY KEY,                    --id
     distributor         INTEGER REFERENCES Distributor,        --id дистрибьютера
@@ -63,19 +69,21 @@ CREATE TABLE Delivery (
 
 
 --Таблица лекарств в поставке
+DROP TABLE IF EXISTS DeliveryContent CASCADE;
 CREATE TABLE DeliveryContent (
     deliveryId          INTEGER REFERENCES Delivery,                    --id поставки
     medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
-    bigNumber           INTEGER NOT NULL (CHECK bigNumber>0),           --количество перевозочных упаковок
-    weight              INTEGER NOT NULL (CHECK weight>0),              --вес одной перевозочной упаковки
-    smallInBigNumber    INTEGER NOT NULL (CHECK smallInBigNumber>0),    --количество отпукных упаковок в одной перевозочной
-    cost                INTEGER NOT NULL (CHECK cost>0)                 --закупочная стоимость одной отпускной упаковки
+    bigNumber           INTEGER NOT NULL CHECK (bigNumber>0),           --количество перевозочных упаковок
+    weight              INTEGER NOT NULL CHECK (weight>0),              --вес одной перевозочной упаковки
+    smallInBigNumber    INTEGER NOT NULL CHECK (smallInBigNumber>0),    --количество отпукных упаковок в одной перевозочной
+    cost                INTEGER NOT NULL CHECK (cost>0)                 --закупочная стоимость одной отпускной упаковки
 );
 
 
 
 
 --Аптеки
+DROP TABLE IF EXISTS Pharmacy CASCADE;
 CREATE TABLE Pharmacy (
     id          SERIAL PRIMARY KEY,         --id
     number      INTEGER UNIQUE NOT NULL,    --номер
@@ -85,14 +93,16 @@ CREATE TABLE Pharmacy (
 
 
 --Цены на лекарства в атеках
+DROP TABLE IF EXISTS MedsInPharmas CASCADE;
 CREATE TABLE MedsInPharmas (
     pharmacyId      INTEGER REFERENCES Pharmacy,                     --id аптеки
     medicineId      INTEGER REFERENCES Medicine,                     --id лекарства
-    cost            INTEGER UNIQUE NOT NULL (CHECK cost > -1),       --цена лекарства в аптеке
-    amount          INTEGER UNIQUE NOT NULL (CHECK amount > -1)      --количество лекарства в аптеке
+    cost            INTEGER UNIQUE NOT NULL CHECK (cost > -1),       --цена лекарства в аптеке
+    amount          INTEGER UNIQUE NOT NULL CHECK (amount > -1)      --количество лекарства в аптеке
 );
 
 --Автомобили
+DROP TABLE IF EXISTS Car CASCADE;
 CREATE TABLE Car (
     id          SERIAL PRIMARY KEY,             --id
     number      VARCHAR(10) UNIQUE NOT NULL,    --регистрационный номер
@@ -101,11 +111,12 @@ CREATE TABLE Car (
 
 
 -- Задания автомобилей
+DROP TABLE IF EXISTS Task CASCADE;
 CREATE TABLE Task (
     carId               INTEGER REFERENCES Car,                         --id машины
     date                DATE UNIQUE NOT NULL,                           --дата поездки
     storageAddress      TEXT UNIQUE NOT NULL,                           --адрес склада
-    number              INTEGER UNIQUE NOT NULL (CHECK number > 0),     --количества лекарства в поставке
+    number              INTEGER UNIQUE NOT NULL CHECK (number > 0),     --количества лекарства в поставке
     medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
     pharmacyId          INTEGER REFERENCES Pharmacy                     --id аптеки
 );
