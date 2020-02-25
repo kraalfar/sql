@@ -97,8 +97,8 @@ DROP TABLE IF EXISTS MedsInPharmas CASCADE;
 CREATE TABLE MedsInPharmas (
     pharmacyId      INTEGER REFERENCES Pharmacy,                     --id аптеки
     medicineId      INTEGER REFERENCES Medicine,                     --id лекарства
-    cost            INTEGER UNIQUE NOT NULL CHECK (cost > -1),       --цена лекарства в аптеке
-    amount          INTEGER UNIQUE NOT NULL CHECK (amount > -1)      --количество лекарства в аптеке
+    cost            INTEGER NOT NULL CHECK (cost > -1),       --цена лекарства в аптеке
+    amount          INTEGER NOT NULL CHECK (amount > -1)      --количество лекарства в аптеке
 );
 
 --Автомобили
