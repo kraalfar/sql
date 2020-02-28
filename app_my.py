@@ -70,10 +70,7 @@ class Planets(object):
         out = ""
         for ind, planet in self.planets.iterrows():
             out += f"{planet[0]:8}: {planet[1]:3} полётов. Первый {planet[2]}. Последний {planet[3]}\n"
-            # out += '{:8}: {:3} полётов. Первый {:12}. Последний {}\n'.format(planet[0],
-            #                                                                           planet[1],
-            #                                                                           planet[2],
-            #                                                                           planet[3])
+
 
         return out
 
