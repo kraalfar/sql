@@ -17,8 +17,8 @@ CREATE TABLE Laboratory (
 
 
 --Сертификат
-DROP TABLE IF EXISTS Laboratory CASCADE;
-CREATE TABLE Laboratory (
+DROP TABLE IF EXISTS Certificate CASCADE;
+CREATE TABLE Certificate (
     id          SERIAL PRIMARY KEY,            --id
     number      INTEGER UNIQUE NOT NULL,       --номер сертификата
     validity    DATE NOT NULL,                 --срок действия
@@ -26,16 +26,32 @@ CREATE TABLE Laboratory (
 );
 
 
+--Лекарственная форма
+DROP TABLE IF EXISTS DosageForm CASCADE;
+CREATE TABLE DosageForm (
+    id                 SERIAL PRIMARY KEY,      --id
+    type               TEXT NOT NULL            --тип лекарственной формы
+);
+
+
+--Производитель
+DROP TABLE IF EXISTS Manufacturer CASCADE;
+CREATE TABLE Manufacturer (
+    id                 SERIAL PRIMARY KEY,      --id
+    info               TEXT NOT NULL            --информация о производиетеле
+);
+
+
 --Лекарства
 DROP TABLE IF EXISTS Medicine CASCADE;
 CREATE TABLE Medicine (
-    id                 SERIAL PRIMARY KEY,                     --id
-    tradeName          TEXT UNIQUE NOT NULL,                   --торговое название
-    genericName        TEXT UNIQUE NOT NULL,                   --международное непатентованное название
-    dosageForm         TEXT NOT NULL,                          --лекарственная форма
-    manufacturer       TEXT NOT NULL,                          --производитель
-    activeSubstance    INTEGER REFERENCES ChemicalCompound,    --id вещества
-    certificate        INT REFERENCES Certificate              --id сертификата
+    id                 SERIAL PRIMARY KEY,                            --id
+    tradeName          TEXT UNIQUE NOT NULL,                          --торговое название
+    genericName        TEXT UNIQUE NOT NULL,                          --международное непатентованное название
+    dosageForm         INTEGER NOT NULL REFERENCES DosageForm,        --лекарственная форма
+    manufacturer       INTEGER NOT NULL REFERENCES Manufacturer,      --производитель
+    activeSubstance    INTEGER REFERENCES ChemicalCompound,           --id вещества
+    certificate        INT REFERENCES Certificate                     --id сертификата
 );
 
 
@@ -47,11 +63,19 @@ CREATE TABLE Medicine (
 DROP TABLE IF EXISTS Distributor CASCADE;
 CREATE TABLE Distributor (
     id                  SERIAL PRIMARY KEY,                --id
-    address             TEXT NOT NULL,                     --адресс дистриббютера
+    address             TEXT NOT NULL,                     --адресс дистрибьютера
     accountNumber       VARCHAR(16) UNIQUE NOT NULL,       --номер банковского счета
     name                TEXT NOT NULL,                     --имя контакного лица
     surname             TEXT NOT NULL,                     --фамилия контакного лица
     phone               TEXT UNIQUE NOT NULL               --телефон контакного лица
+);
+
+
+DROP TABLE IF EXISTS Storage CASCADE;
+CREATE TABLE Storage (
+    id           SERIAL PRIMARY KEY,             --id
+    Number       INTEGER UNIQUE NOT NULL,        --номер склада
+    Address      TEXT NOT NULL                   --адрес склада
 );
 
 
@@ -60,8 +84,7 @@ DROP TABLE IF EXISTS Delivery CASCADE;
 CREATE TABLE Delivery (
     id                  SERIAL PRIMARY KEY,                    --id
     distributor         INTEGER REFERENCES Distributor,        --id дистрибьютера
-    storageNumber       INTEGER UNIQUE NOT NULL,               --номер склада
-    storageAddress      TEXT NOT NULL,                         --адрес склада
+    storageId           INTEGER REFERENCES Storage,            --id склада
     arrivalTime         TIMESTAMP,                             --время прибытия
     manName             TEXT                                   --фамилия кладовщика
 
@@ -75,8 +98,9 @@ CREATE TABLE DeliveryContent (
     medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
     bigNumber           INTEGER NOT NULL CHECK (bigNumber>0),           --количество перевозочных упаковок
     weight              INTEGER NOT NULL CHECK (weight>0),              --вес одной перевозочной упаковки
-    smallInBigNumber    INTEGER NOT NULL CHECK (smallInBigNumber>0),    --количество отпукных упаковок в одной перевозочной
-    cost                INTEGER NOT NULL CHECK (cost>0)                 --закупочная стоимость одной отпускной упаковки
+    smallInBigNumber    INTEGER NOT NULL CHECK (smallInBigNumber>0),    --количество отпускных упаковок в одной перевозочной
+    cost                INTEGER NOT NULL CHECK (cost>0),                --закупочная стоимость одной отпускной упаковки
+    PRIMARY KEY (deliveryId, medicineId)
 );
 
 
@@ -98,7 +122,8 @@ CREATE TABLE MedsInPharmas (
     pharmacyId      INTEGER REFERENCES Pharmacy,              --id аптеки
     medicineId      INTEGER REFERENCES Medicine,              --id лекарства
     cost            INTEGER NOT NULL CHECK (cost > -1),       --цена лекарства в аптеке
-    amount          INTEGER NOT NULL CHECK (amount > -1)      --количество лекарства в аптеке
+    amount          INTEGER NOT NULL CHECK (amount > -1),     --количество лекарства в аптеке
+    PRIMARY KEY (pharmacyId, medicineId)
 );
 
 --Автомобили
@@ -114,11 +139,12 @@ CREATE TABLE Car (
 DROP TABLE IF EXISTS Task CASCADE;
 CREATE TABLE Task (
     carId               INTEGER REFERENCES Car,                         --id машины
-    date                DATE UNIQUE NOT NULL,                           --дата поездки
-    storageAddress      TEXT UNIQUE NOT NULL,                           --адрес склада
+    time                TIMESTAMP,                                      --дата и время поездки
+    storageId           INTEGER REFERENCES Storage,                     --id склада
     number              INTEGER UNIQUE NOT NULL CHECK (number > 0),     --количества лекарства в поставке
     medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
     pharmacyId          INTEGER REFERENCES Pharmacy                     --id аптеки
+    PRIMARY KEY (carId, time)
 );
 
 
