@@ -1,3 +1,6 @@
+CREATE OR REPLACE FUNCTION GenerateSchema() RETURNS VOID AS $$
+BEGIN
+
 --Действущие вещества ака химическое соединение
 DROP TABLE IF EXISTS ChemicalCompound CASCADE;
 CREATE TABLE ChemicalCompound (
@@ -106,6 +109,8 @@ CREATE TABLE DeliveryContent (
 
 
 
+
+
 --Аптеки
 DROP TABLE IF EXISTS Pharmacy CASCADE;
 CREATE TABLE Pharmacy (
@@ -143,7 +148,7 @@ CREATE TABLE Task (
     storageId           INTEGER REFERENCES Storage,                     --id склада
     number              INTEGER UNIQUE NOT NULL CHECK (number > 0),     --количества лекарства в поставке
     medicineId          INTEGER REFERENCES Medicine,                    --id лекарства
-    pharmacyId          INTEGER REFERENCES Pharmacy                     --id аптеки
+    pharmacyId          INTEGER REFERENCES Pharmacy,                    --id аптеки
     PRIMARY KEY (carId, time)
 );
 
@@ -151,9 +156,7 @@ CREATE TABLE Task (
 
 
 
+END;
+$$ LANGUAGE plpgsql;
 
 
-
--- Справочник. Если есть конечное множество значений.
--- Create Enum - просто перечсиление всех возможных значений
--- Create Table  с атрибутами id и value
