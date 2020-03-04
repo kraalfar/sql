@@ -23,21 +23,43 @@ def get_conn():
 
 
 class Meds(object):
-
     def __init__(self, drug_id):
-        if drug_id:
-            query = "with big as( select M.tradename, P.number,  cost " \
-                    "from Medicine M join MedsInPharmas MP on (M.id=MP.medicineid) " \
-                    f"join Pharmacy P  on (P.id = MP.pharmacyid) where amount > 0 and M.id={drug_id} ), " \
-                    "Pcount as( select count(*) from Pharmacy) " \
-                    "select  * from big cross join Pcount order by big.tradeName;"
+        if drug_id is not None:
+            try:
+                drug_id = int(drug_id)
+            except ValueError:
+                raise ValueError("Expected number as drug_id")
 
+            query = """with T1 as(
+                            select M.id, M.tradename,
+                                   count(MP) / (select count(*) from pharmacy)::NUMERIC  as cnt,
+                                   min(MP.cost) as minCost
+                            from Medicine M join MedsInPharmas MP on (M.id = MP.medicineId)
+                            where M.id={0}
+                            group by M.id
+                        ), T2 as(
+                               select M.id, M.tradename, MP.cost, MP.pharmacyId
+                               from Medicine M join MedsInPharmas MP on (M.id = MP.medicineId)
+                               where M.id={0})
+                        select T2.tradename, T1.cnt, T1.minCost,  array_agg(T2.pharmacyId)
+                               from T1 join T2 on (T1.id = T2.id) 
+                               where T2.cost = T1.minCost
+                               group by T2.tradename, T1.cnt, T1.minCost;""".format(drug_id)
         else:
-            query = "with big as( select M.tradename, P.number, cost " \
-                    "from Medicine M join MedsInPharmas MP on (M.id=MP.medicineid) " \
-                    f"join Pharmacy P  on (P.id = MP.pharmacyid) where amount > 0), " \
-                    "Pcount as( select count(*) from Pharmacy) " \
-                    "select  * from big cross join Pcount order by big.tradeName;"
+            query = """with T1 as(
+                            select M.id, M.tradename,
+                                   count(MP) / (select count(*) from pharmacy)::NUMERIC  as cnt,
+                                   min(MP.cost) as minCost
+                            from Medicine M join MedsInPharmas MP on (M.id = MP.medicineId)
+                            group by M.id
+                        ), T2 as(
+                               select M.id, M.tradename, MP.cost, MP.pharmacyId
+                               from Medicine M join MedsInPharmas MP on (M.id = MP.medicineId))
+                        select T2.tradename, T1.cnt, T1.minCost,  array_agg(T2.pharmacyId)
+                               from T1 join T2 on (T1.id = T2.id) 
+                              where T2.cost = T1.minCost
+                               group by T2.tradename, T1.cnt, T1.minCost
+                               order by T2.tradename;"""
 
         with get_conn() as conn:
             cur = conn.cursor()
@@ -48,19 +70,10 @@ class Meds(object):
             self.min_cost = []
             self.numbers = []
             for row in cur.fetchall():
-                if row is not None:
-                    if len(self.names) == 0 or self.names[-1] != row[0]:
-                        self.names.append(row[0])
-                        self.pharma_cnt.append(0.)
-                        self.min_cost.append(-1)
-                        self.numbers.append([])
-
-                    self.pharma_cnt[-1] += 1 / row[3]
-                    if self.min_cost[-1] == -1 or row[2] < self.min_cost[-1]:
-                        self.min_cost[-1] = row[2]
-                        self.numbers[-1] = [row[1]]
-                    elif row[2] == self.min_cost[-1]:
-                        self.numbers[-1].append(row[1])
+                self.names.append(row[0])
+                self.pharma_cnt.append(row[1])
+                self.min_cost.append(row[2])
+                self.numbers.append(row[3])
 
     def to_string(self):
         out = ""
@@ -83,7 +96,6 @@ class App(object):
     @cherrypy.expose
     def hello(self):
         return "Hello DB"
-
 
     @cherrypy.expose
     def drug_id(self, drug_id=None):
